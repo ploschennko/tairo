@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -363,7 +364,7 @@
             <textarea id="userQuestion" placeholder="Наприклад: Що чекає на мене в кар'єрі найближчі 3 місяці? Або залиште порожнім для загального прогнозу..."></textarea>
         </div>
         <div class="actions">
-            <button id="submitBtn" onclick="startTarotSpread()">Зробити розклад</button>
+            <button id="submitBtn">Зробити розклад</button>
         </div>
     </div>
 
@@ -377,24 +378,24 @@
         <div class="cards-grid" id="cardsGrid"></div>
 
         <div class="actions" style="margin-top: 50px;">
-            <button class="secondary" onclick="resetSpread()">Нове запитання</button>
+            <button class="secondary" id="resetBtn">Нове запитання</button>
         </div>
     </div>
 </div>
 
 <footer>
-    &copy; 2026 Віртуальне Таро • Налаштовано для GitHub Pages
+    &copy; 2026 Віртуальне Таро • Налаштовано для вільного розгортання
 </footer>
 
 <script>
-    "use strict"; // Жорсткий режим увімкнено, жодних випадкових зв'язків та помилок
+    "use strict";
 
     const fullTarotDeck = [
         { name: "0. Дурень (The Fool)", upright: "Початок абсолютно нового життєвого етапу, чистий аркуш, крок у невідоме з легкою душею. Всесвіт відкриває перед вами всі двері. Довіртеся інтуїції, забудьте про старі страхи та дійте нестандартно.", reversed: "Прояв безвідповідальності, безглуздий ризик, хаос або повна неготовність до змін. Ви намагаєтеся втекти від реальності або робите важливий крок, не продумавши наслідки." },
-        { name: "I. Маг (The Magician)", upright: "Висока концентрація волі, майстерність, лідерство та здатність матеріалізувати свої бажання. У вас є абсолютно всі інструменти та recursos для досягнення мети. Час діяти рішуче та брати контроль у свої руки.", reversed: "Приховані маніпуляції з боку оточення або обивательське використання сили вами. Також може вказувати на невпевненість, синдром самозванця та нерішучість через упущені можливості." },
+        { name: "I. Маг (The Magician)", upright: "Висока концентрація волі, майстерність, лідерство та здатність матеріалізувати свої бажання. У вас є абсолютно всі інструменти та ресурси для досягнення мети. Час діяти рішуче та брати контроль у свої руки.", reversed: "Приховані маніпуляції з боку оточення або егоїстичне використання сили вами. Також може вказувати на невпевненість, синдром самозванця та нерішучість через упущені можливості." },
         { name: "II. Верховна Жриця (The High Priestess)", upright: "Глибока інтуїція, таємні знання, підсвідомість і потреба в пасивному спостереженні. Зараз не варто форсувати події. Прислухайтеся до внутрішнього голосу та звертайте увагу на знаки долі й сни.", reversed: "Ігнорування внутрішнього голосу, поверхневі судження, розкриття неприємних таємниць. Ви покладаєтеся виключно на логіку там, де потрібно відчувати серцем." },
         { name: "III. Імператриця (The Empress)", upright: "Родючість, матеріальний достаток, творчий розквіт, материнство і гармонія. Чудовий час для запуску нових проектів, сімейного затишку та стабілізації фінансів. Все, що ви посіяли, дасть багатий урожай.", reversed: "Творчий застій, деструктивний контроль над близькими, побутові проблеми або фінансова нестабільність. Можливий егоцентризм або навпаки — повне вигорання через надмірну турботу про інших." },
-        { name: "IV. Імператор (The Emperor)", upright: "Стабільність, жорстка структура, закон, autoритет і захист інтересів. Карта закликає діяти раціонально, навести лад у справах, проявити дисципліну та лідерські якості для зміцнення своїх позицій.", reversed: "Прояви тиранії, деспотизму або повна втрата контролю над ситуацією. Конфлікти з керівництвом, батьком або державними структурами. Брак самодисципліни руйнує плани." },
+        { name: "IV. Імператор (The Emperor)", upright: "Стабільність, жорстка структура, закон, авторитет і захист інтересів. Карта закликає діяти раціонально, навести лад у справах, проявити дисципліну та лідерські якості для зміцнення своїх позицій.", reversed: "Прояви тиранії, деспотизму або повна втрата контролю над ситуацією. Конфлікти з керівництвом, батьком або державними структурами. Брак самодисципліни руйнує плани." },
         { name: "V. Ієрофант (The Hierophant)", upright: "Традиції, духовне чи інтелектуальне навчання, дотримання правил і пошук вищого сенсу. Карта вказує на важливість моральних орієнтирів. Сприятливий час для отримання знань або звернення до наставника.", reversed: "Бунтарство проти застарілих догм, радикалізм, отримання хибних або шкідливих порад. Втрата авторитету, фанатизм або небажання адаптуватися до нових реалій." },
         { name: "VI. Закохані (The Lovers)", upright: "Необхідність зробити важливий життєвий вибір (не обов'язково в коханні). Гармонія у стосунках, союз однодумців, внутрішній баланс. Вибір має бути зроблений серцем, а не холодним розрахунком.", reversed: "Внутрішній розкол, дисгармонія з партнером, невірний або затягнутий вибір. Конфлікт між почуттями та розумом, який заважає рухатися далі." },
         { name: "VII. Колісниця (The Chariot)", upright: "Стрімкий прорив, заслужений тріумф, перемога завдяки залізній силі волі та самоконтролю. Ви чітко бачите ціль і керуєте обставинами. Карта подорожей та успішного подолання будь-яких перешкод.", reversed: "Втрата контролю над ситуацією, раптовий зрив планів через зайву емоційність або агресію. Ви рухаєтеся в хибному напрямку або дієте надто імпульсивно." },
@@ -410,4 +411,101 @@
         { name: "XVII. Зірка (The Star)", upright: "Надія, натхнення, віра в майбутнє, духовне відновлення та захист вищих сил. Навіть після важкої кризи перед вами з'являється світло в кінці тунелю. Ваші довгострокові цілі обов'язково реалізуються.", reversed: "Розчарування, песимізм, зневіра у власні сили, втрачені можливості. Ви не бачите перспектив і опускаєте руки за крок до успіху через депресивний настрій." },
         { name: "XVIII. Місяць (The Moon)", upright: "Період невизначеності, прихованих страхів, ілюзій та обману. Не все є тим, чим здається на перший погляд. Карта вказує на активовану інтуїцію, але попереджає про можливі таємниці навколо вас.", reversed: "Прояснення заплутаної ситуації, викриття брехні, подолання нічних жахів та безпідставних страхів. Повернення здорового глузду та раціонального погляду на речі." },
         { name: "XIX. Сонце (The Sun)", upright: "Повний успіх, абсолютна ясність, щастя, життєва енергія, здоров'я та тріумф. Найсприятливіша карта в колоді. Всі ваші плани реалізуються в найкращому вигляді, на вас чекає визнання та радість.", reversed: "Тимчасові дрібні хмари на ясному небі. Успіх трохи затримується або ви проявляєте надмірний егоцентризм і марнославство, що заважає іншим розділити вашу радість." },
-        { name: "XX. Суд (Judgement)",
+        { name: "XX. Суд (Judgement)", upright: "Духовне пробудження, підбиття підсумків, важливе доленосне рішення, покликання. Ви звільняєтеся від минулих образ і виходите на абсолютно новий рівень усвідомленості. Час змінити життя.", reversed: "Жаль про минулі помилки, страх перед осудом оточення, відкладання доленосних рішень на потім. Ви ігноруєте знаки долі та тримаєтеся за старі патерни поведінки." },
+        { name: "XXI. Світ (The World)", upright: "Тріумфальне завершення великого життєвого шляху, абсолютна гармонія, досягнення головної мети, визнання. Ви перебуваєте в ідеальній точці балансу із всесвітом, відчуваючи свободу та цілісність.", reversed: "Ціль дуже близька, але фінальний крок ще не зроблено через незавершені дрібні справи. Застій на самому фініші, незадоволеність результатом через внутрішній перфекціонізм." }
+    ];
+
+    const positions = ["Минуле (Що вплинуло)", "Теперішнє (Що є зараз)", "Майбутнє (Що буде)"];
+
+    // Використовуємо надійні Event Listener'и замість старих onclick
+    document.addEventListener("DOMContentLoaded", function() {
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                console.log('Магія почалася...'); // Для перевірки в консолі F12
+                
+                const questionInput = document.getElementById('userQuestion');
+                const inputBlock = document.getElementById('inputBlock');
+                const shufflingBlock = document.getElementById('shufflingBlock');
+                const spreadBlock = document.getElementById('spreadBlock');
+                const queryDisplay = document.getElementById('queryDisplay');
+                const cardsGrid = document.getElementById('cardsGrid');
+
+                const questionText = questionInput.value.trim();
+
+                submitBtn.disabled = true;
+                inputBlock.style.display = 'none';
+                shufflingBlock.style.display = 'block';
+                spreadBlock.style.display = 'none';
+
+                setTimeout(() => {
+                    shufflingBlock.style.display = 'none';
+                    spreadBlock.style.display = 'block';
+                    submitBtn.disabled = false; 
+
+                    if (questionText) {
+                        queryDisplay.innerText = `Ваш запит: «${questionText}»`;
+                        queryDisplay.style.display = 'inline-block';
+                    } else {
+                        queryDisplay.innerText = "Загальний аналіз життєвого потоку";
+                        queryDisplay.style.display = 'inline-block';
+                    }
+
+                    let deckCopy = [...fullTarotDeck];
+                    let selectedCards = [];
+                    for (let i = 0; i < 3; i++) {
+                        let randomIndex = Math.floor(Math.random() * deckCopy.length);
+                        selectedCards.push(deckCopy.splice(randomIndex, 1)[0]);
+                    }
+
+                    cardsGrid.innerHTML = '';
+
+                    selectedCards.forEach((card, index) => {
+                        const isUpright = Math.random() > 0.35; 
+                        const statusText = isUpright ? "Пряме положення" : "Перевернуте положення";
+                        const statusClass = isUpright ? "status-direct" : "status-reversed";
+                        const interpretation = isUpright ? card.upright : card.reversed;
+
+                        const cardWrapper = document.createElement('div');
+                        cardWrapper.className = 'tarot-card-wrapper';
+                        
+                        cardWrapper.innerHTML = `
+                            <div class="tarot-card-inner">
+                                <div class="card-back">
+                                    <div class="card-back-pattern"></div>
+                                </div>
+                                <div class="card-front">
+                                    <div class="position-badge">${positions[index]}</div>
+                                    <div class="card-title">${card.name}</div>
+                                    <div class="status-badge ${statusClass}">${statusText}</div>
+                                    <div class="interpretation-text">${interpretation}</div>
+                                </div>
+                            </div>
+                        `;
+
+                        cardsGrid.appendChild(cardWrapper);
+
+                        setTimeout(() => {
+                            cardWrapper.classList.add('flipped');
+                        }, (index + 1) * 400);
+                    });
+
+                }, 1800);
+            });
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                document.getElementById('userQuestion').value = '';
+                document.getElementById('inputBlock').style.display = 'block';
+                document.getElementById('spreadBlock').style.display = 'none';
+                document.getElementById('shufflingBlock').style.display = 'none';
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
