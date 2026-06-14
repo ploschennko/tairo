@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Віртуальний Оракул Таро — безкоштовний онлайн розклад на Старших Арканах.">
+    <meta name="theme-color" content="#0b0814">
+    <title>Віртуальний Оракул Таро — Онлайн Розклад</title>
+    <style>
+        :root {
+            --bg-color: #0b0814;
+            --card-bg: #151026;
+            --accent-purple: #9d4edd;
+            --accent-glow: #c77dff;
+            --text-main: #e0aaff;
+            --text-muted: #9e95be;
+            --gold: #ffd700;
+            --gold-glow: rgba(255, 215, 0, 0.3);
+            --error: #ff4d4d;
+            --success: #00e676;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(123, 44, 191, 0.15) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--gold);
+            font-size: 2.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .workspace {
+            background: rgba(21, 16, 38, 0.7);
+            border: 1px solid rgba(157, 78, 221, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin-bottom: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            color: var(--accent-glow);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: rgba(11, 8, 20, 0.8);
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            color: #fff;
+            padding: 15px;
+            font-size: 1.05rem;
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.25), inset 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
+            color: #fff;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 20px rgba(157, 78, 221, 0.4);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(157, 78, 221, 0.6);
+            background: linear-gradient(135deg, #a450e6, #863cc7);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        button.secondary {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            box-shadow: none;
+        }
+
+        button.secondary:hover {
+            background: rgba(158, 149, 190, 0.1);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        /* Анімація завантаження */
+        .shuffling {
+            display: none;
+            margin: 40px 0;
+            font-size: 1.2rem;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .shuffling-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80% { content: '...'; }
+        }
+
+        /* Сітка розкладу */
+        .spread-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .user-query-display {
+            font-style: italic;
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            padding: 15px;
+            border-left: 3px solid var(--gold);
+            background: rgba(255, 215, 0, 0.05);
+            display: inline-block;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            perspective: 1000px;
+        }
+
+        /* 3D Карта */
+        .tarot-card-wrapper {
+            height: 480px;
+            cursor: pointer;
+        }
+
+        .tarot-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .tarot-card-wrapper.flipped .tarot-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            padding: 30px 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #100b26 0%, #1d153a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--accent-purple);
+        }
+
+        .card-back-pattern {
+            width: 100%;
+            height: 100%;
+            border: 1px dashed rgba(157, 78, 221, 0.3);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .card-back-pattern::before {
+            content: "✦";
+            font-size: 3rem;
+            color: var(--gold);
+            opacity: 0.4;
+            text-shadow: 0 0 10px var(--gold);
+        }
+
+        .card-front {
+            background: var(--card-bg);
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border-color: rgba(157, 78, 221, 0.4);
+            overflow-y: auto;
+        }
+
+        .position-badge {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-size: 1.45rem;
+            color: var(--gold);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 22px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-direct {
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .status-reversed {
+            background: rgba(255, 77, 77, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(255, 77, 77, 0.3);
+        }
+
+        .interpretation-text {
+            font-size: 0.98rem;
+            line-height: 1.6;
+            color: #ebdfff;
+            text-align: left;
+            border-top: 1px solid rgba(157, 78, 221, 0.2);
+            padding-top: 15px;
+        }
+
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .card-front::-webkit-scrollbar { width: 4px; }
+        .card-front::-webkit-scrollbar-track { background: transparent; }
+        .card-front::-webkit-scrollbar-thumb { background: rgba(157, 78, 221, 0.3); border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .workspace { padding: 20px; }
+            .tarot-card-wrapper { height: 440px; }
+            .actions { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Віртуальний Оракул Таро</h1>
+        <p class="subtitle">Повноцінна колода Старших Арканів. Отримайте глибокий аналіз вашої ситуації через класичний трикартковий розклад: Минуле, Теперішнє, Майбутнє.</p>
+    </header>
+
+    <div class="workspace" id="inputBlock">
+        <div class="input-group">
+            <label for="userQuestion">Ваше запитання або опис ситуації</label>
+            <textarea id="userQuestion" placeholder="Наприклад: Що чекає на мене в кар'єрі найближчі 3 місяці? Або залиште порожнім для загального прогнозу..."></textarea>
+        </div>
+        <div class="actions">
+            <button id="submitBtn" onclick="startTarotSpread()">Зробити розклад</button>
+        </div>
+    </div>
+
+    <div class="shuffling" id="shufflingBlock">
+        <span class="shuffling-dots">Тасуємо колоду, налаштовуємося на інформаційне поле</span>
+    </div>
+
+    <div class="spread-container" id="spreadBlock">
+        <div id="queryDisplay" class="user-query-display"></div>
+        
+        <div class="cards-grid" id="cardsGrid"></div>
+
+        <div class="actions" style="margin-top: 50px;">
+            <button class="secondary" onclick="resetSpread()">Нове запитання</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    &copy; 2026 Віртуальне Таро • Налаштовано для GitHub Pages
+</footer>
+
+<script>
+    "use strict"; // Жорсткий режим увімкнено, жодних випадкових зв'язків та помилок
+
+    const fullTarotDeck = [
+        { name: "0. Дурень (The Fool)", upright: "Початок абсолютно нового життєвого етапу, чистий аркуш, крок у невідоме з легкою душею. Всесвіт відкриває перед вами всі двері. Довіртеся інтуїції, забудьте про старі страхи та дійте нестандартно.", reversed: "Прояв безвідповідальності, безглуздий ризик, хаос або повна неготовність до змін. Ви намагаєтеся втекти від реальності або робите важливий крок, не продумавши наслідки." },
+        { name: "I. Маг (The Magician)", upright: "Висока концентрація волі, майстерність, лідерство та здатність матеріалізувати свої бажання. У вас є абсолютно всі інструменти та recursos для досягнення мети. Час діяти рішуче та брати контроль у свої руки.", reversed: "Приховані маніпуляції з боку оточення або обивательське використання сили вами. Також може вказувати на невпевненість, синдром самозванця та нерішучість через упущені можливості." },
+        { name: "II. Верховна Жриця (The High Priestess)", upright: "Глибока інтуїція, таємні знання, підсвідомість і потреба в пасивному спостереженні. Зараз не варто форсувати події. Прислухайтеся до внутрішнього голосу та звертайте увагу на знаки долі й сни.", reversed: "Ігнорування внутрішнього голосу, поверхневі судження, розкриття неприємних таємниць. Ви покладаєтеся виключно на логіку там, де потрібно відчувати серцем." },
+        { name: "III. Імператриця (The Empress)", upright: "Родючість, матеріальний достаток, творчий розквіт, материнство і гармонія. Чудовий час для запуску нових проектів, сімейного затишку та стабілізації фінансів. Все, що ви посіяли, дасть багатий урожай.", reversed: "Творчий застій, деструктивний контроль над близькими, побутові проблеми або фінансова нестабільність. Можливий егоцентризм або навпаки — повне вигорання через надмірну турботу про інших." },
+        { name: "IV. Імператор (The Emperor)", upright: "Стабільність, жорстка структура, закон, autoритет і захист інтересів. Карта закликає діяти раціонально, навести лад у справах, проявити дисципліну та лідерські якості для зміцнення своїх позицій.", reversed: "Прояви тиранії, деспотизму або повна втрата контролю над ситуацією. Конфлікти з керівництвом, батьком або державними структурами. Брак самодисципліни руйнує плани." },
+        { name: "V. Ієрофант (The Hierophant)", upright: "Традиції, духовне чи інтелектуальне навчання, дотримання правил і пошук вищого сенсу. Карта вказує на важливість моральних орієнтирів. Сприятливий час для отримання знань або звернення до наставника.", reversed: "Бунтарство проти застарілих догм, радикалізм, отримання хибних або шкідливих порад. Втрата авторитету, фанатизм або небажання адаптуватися до нових реалій." },
+        { name: "VI. Закохані (The Lovers)", upright: "Необхідність зробити важливий життєвий вибір (не обов'язково в коханні). Гармонія у стосунках, союз однодумців, внутрішній баланс. Вибір має бути зроблений серцем, а не холодним розрахунком.", reversed: "Внутрішній розкол, дисгармонія з партнером, невірний або затягнутий вибір. Конфлікт між почуттями та розумом, який заважає рухатися далі." },
+        { name: "VII. Колісниця (The Chariot)", upright: "Стрімкий прорив, заслужений тріумф, перемога завдяки залізній силі волі та самоконтролю. Ви чітко бачите ціль і керуєте обставинами. Карта подорожей та успішного подолання будь-яких перешкод.", reversed: "Втрата контролю над ситуацією, раптовий зрив планів через зайву емоційність або агресію. Ви рухаєтеся в хибному напрямку або дієте надто імпульсивно." },
+        { name: "VIII. Сила (Strength)", upright: "Внутрішня стійкість, духовна сила, терпіння та м'яке приборкання внутрішніх пристрастей чи зовнішніх ворогів. Ви здатні перемогти будь-які труднощі не грубою силою, а витримкою та дипломатією.", reversed: "Слабкість духу, невпевненість у собі, спалахи гніву або депресивні стани. Намагання вирішити питання тиском та агресією, що призведе лише до руйнування." },
+        { name: "IX. Відшельник (The Hermit)", upright: "Час для самоаналізу, усамітнення, пошуку істини та життєвої мудрості. Поставте зовнішню метушню на паузу. Карта радить побути наодинці з собою, щоб переоцінити пріоритети та знайти відповіді всередині.", reversed: "Навмисна ізоляція, яка переходить у параною, самотність, відірваність від реальності. Відмова приймати мудрі поради або гординя, що заважає комунікації." },
+        { name: "X. Колесо Фортуни (Wheel of Fortune)", upright: "Доленосні зміни, несподіваний поворот подій, везіння та початок нового життєвого циклу. Обставини складаються на вашу користь без вашого прямого втручання. Довіртеся потоку змін.", reversed: "Тимчасова смуга невдач, застій або затяжний опір неминучим змінам. Карта нагадує: цей спад тимчасовий, не намагайтеся утримати те, що руйнується саме." },
+        { name: "XI. Справедливість (Justice)", upright: "Чесність, об'єктивність, юридична чистота, закон карми. Ви отримаєте саме те, на що заслуговуєте своїми минулими вчинками. Час приймати зважені, справедливі рішення без емоційних перекосів.", reversed: "Несправедливі звинувачення, упереджене ставлення, проблеми із законом чи бюрократією. Небажання визнавати власні помилки та брати на себе відповідальність." },
+        { name: "XII. Повішений (The Hanged Man)", upright: "Необхідність поглянути на ситуацію під кардинально іншим кутом, вимушена пауза або добровільна жертва заради вищої мети. Час зупинитися, переосмислити цінності та відпустити контроль.", reversed: "Марні жертви, егоїзм, застрягання в ролі 'жертви'. Ви витрачаєте енергію даремно, відмовляючись змінювати свій світогляд або затягуючи неминуче рішення." },
+        { name: "XIII. Смерть (Death)", upright: "Глибока внутрішня та зовнішня трансформація, остаточне завершення старого життєвого циклу. Щось має безповоротно піти (робота, стосунки, старі звички), щоб звільнити місце для нового.", reversed: "Болісний страх змін, чіпляння за минуле, яке вже відмерло. Спроба реанімувати те, що приносить вам лише шкоду. Опір оновленню затягує кризу." },
+        { name: "XIV. Помірність (Temperance)", upright: "Баланс, душевний спокій, гармонія, зцілення та компроміс. Карта закликає знайти золоту середину, проявити терпіння та дипломатичність. Ситуація вирішиться мирним і природним шляхом.", reversed: "Дисбаланс, надмірність у чомусь (емоції, витрати, звички), внутрішній хаос. Конфлікти через брак компромісів, метушливість і намагання отримати все й одразу." },
+        { name: "XV. Диявол (The Devil)", upright: "Матеріальні залежності, сильні спокуси, токсичні прив'язаності, страхи або маніпуляції. Ви стали заручником своїх пристрастей, егоїзму або тіньових сторін. Потрібно усвідомити, що кайдани — лише ілюзія.", reversed: "Початок звільнення від токсичних стосунків або шкідливих звичок. Подолання внутрішніх страхів, духовне очищення, повернення контролю над своїм життям." },
+        { name: "XVI. Вежа (The Tower)", upright: "Раптове і болісне руйнування старих ілюзій, крах планів, радикальна криза. Проте це визволення від того, що обмежувало вас. Старий фундамент зруйновано, будуйте нове, чисте життя.", reversed: "Уникнення неминучої катастрофи в останній момент, але напруга залишається. Ви живете в пороховій бочці, боячись відпустити те, що все одно приречене на розпад." },
+        { name: "XVII. Зірка (The Star)", upright: "Надія, натхнення, віра в майбутнє, духовне відновлення та захист вищих сил. Навіть після важкої кризи перед вами з'являється світло в кінці тунелю. Ваші довгострокові цілі обов'язково реалізуються.", reversed: "Розчарування, песимізм, зневіра у власні сили, втрачені можливості. Ви не бачите перспектив і опускаєте руки за крок до успіху через депресивний настрій." },
+        { name: "XVIII. Місяць (The Moon)", upright: "Період невизначеності, прихованих страхів, ілюзій та обману. Не все є тим, чим здається на перший погляд. Карта вказує на активовану інтуїцію, але попереджає про можливі таємниці навколо вас.", reversed: "Прояснення заплутаної ситуації, викриття брехні, подолання нічних жахів та безпідставних страхів. Повернення здорового глузду та раціонального погляду на речі." },
+        { name: "XIX. Сонце (The Sun)", upright: "Повний успіх, абсолютна ясність, щастя, життєва енергія, здоров'я та тріумф. Найсприятливіша карта в колоді. Всі ваші плани реалізуються в найкращому вигляді, на вас чекає визнання та радість.", reversed: "Тимчасові дрібні хмари на ясному небі. Успіх трохи затримується або ви проявляєте надмірний егоцентризм і марнославство, що заважає іншим розділити вашу радість." },
+        { name: "XX. Суд (Judgement)",
